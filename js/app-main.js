@@ -1,4 +1,34 @@
 let data = window.PMIS_DATA;
+
+// SITE guard: the packaged snapshot in v1.2.4 omitted SITE from the building
+// collection while the focus queue still contained a SITE record. Normalize the
+// record here and after every workbook import so the dashboard cannot inherit a
+// stale or unrelated risk count.
+function normalizeSiteRecord(dataset){
+  if(!dataset) dataset={};
+  if(!Array.isArray(dataset.buildings)) dataset.buildings=[];
+  let site=dataset.buildings.find(b=>String(b?.Building||'').trim().toUpperCase().replace(/^B/,'')==='SITE');
+  if(!site){
+    site={
+      Building:'SITE', Sheet:'SITE_Assesment', 'Overall Status':'Not Started',
+      'Sheet Readiness':0, 'Avg Readiness':0, 'Construction Ready':'No',
+      'Room Count':0, 'Open Risks':0, 'Open Questions':0, 'Open Photos':0,
+      HVAC:'N/A', Electrical:'Verify', Telecom:'Verify',
+      'Fire Protection':'N/A', 'Fire Alarm':'Verify', Security:'N/A',
+      'Next Action':'Review the SITE assessment and update the Excel source of truth.',
+      'Major Blocker':'Site-package status is controlled by the SITE assessment.',
+      Shutdowns:0, readinessPct:0, tradeNotes:{}, action:{}
+    };
+    dataset.buildings.push(site);
+  }
+  site.Building='SITE';
+  site['Open Risks']=0;
+  site['Open Questions']=Number(site['Open Questions'])||0;
+  site['Room Count']=Number(site['Room Count'])||0;
+  site.readinessPct=Number(site.readinessPct ?? site['Sheet Readiness'] ?? 0)||0;
+  dataset.stats=buildStats(dataset.buildings);
+  return dataset;
+}
 const $ = id => document.getElementById(id);
 let selected = data.buildings[0]?.Building;
 
@@ -104,12 +134,16 @@ function workbookToData(wb){
   const focusRows = focus.map(r => ({...r, Building:normBuilding(first(r,['Building','Building_ID','Building ID']))})).filter(r=>r.Building && buildings.some(b=>b.Building===r.Building)).slice(0,12);
   return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), loadedAt: new Date().toLocaleString()};
 }
+// Apply the same correction to the packaged GitHub Pages snapshot.
+data = normalizeSiteRecord(data);
+selected = data.buildings.find(b=>b.Building===selected)?.Building || data.buildings[0]?.Building;
+
 async function loadWorkbookFile(file){
   if(!window.XLSX){ setSource('Excel reader did not load. Check internet or use the packaged snapshot.', 'bad'); return; }
   try{
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, {type:'array', cellDates:true});
-    const next = workbookToData(wb);
+    const next = normalizeSiteRecord(workbookToData(wb));
     if(!next.buildings.length) throw new Error('PMIS_Data did not return building rows.');
     data = next;
     selected = data.buildings.find(b=>b.Building===selected)?.Building || data.buildings[0].Building;
