@@ -1,3 +1,8 @@
+## 1.3.4
+- Fixed live Excel import so CM_PM Operations and COR_Report are parsed into the COR Reporting Center.
+- Preserved COR report data after loading a workbook instead of replacing it with building-only data.
+- Added fallback parsing from the CM/PM manual action register.
+
 # Changelog
 
 ## v1.2.4 — GitHub Long-Haul Stack

@@ -74,6 +74,89 @@ function sheetRows(wb, name){
     return obj;
   }).filter(obj => Object.values(obj).some(v => String(v).trim() !== ''));
 }
+function sheetAoa(wb, name){
+  const target=wb.SheetNames.find(n=>n.toLowerCase()===String(name).toLowerCase());
+  if(!target) return [];
+  return XLSX.utils.sheet_to_json(wb.Sheets[target], {header:1, defval:'', raw:false});
+}
+function excelDisplay(v){
+  if(v==null) return '';
+  if(v instanceof Date) return v.toLocaleDateString();
+  return String(v).trim();
+}
+function rowHasData(row){return Array.isArray(row)&&row.some(v=>excelDisplay(v)!=='');}
+function rowObject(headers,row){
+  const out={};
+  headers.forEach((h,i)=>{const key=excelDisplay(h);if(key)out[key]=row[i]??'';});
+  return out;
+}
+function workbookToCorReports(wb){
+  const rows=sheetAoa(wb,'COR_Report');
+  if(!rows.length) return null;
+  const get=(r,c)=>excelDisplay((rows[r-1]||[])[c-1]);
+  const meta={
+    reportType:get(4,2)||'Weekly',
+    periodStart:get(4,4),
+    preparedBy:get(5,2),
+    periodEnd:get(5,4),
+    reviewedWith:get(6,2),
+    selectedBuilding:get(6,4),
+    projectPhase:get(7,2)||'Project Status',
+    contractorSchedule:get(7,4)||'Pending',
+    reportSource:get(8,2),
+    executiveSummary:get(15,1)
+  };
+  const starts=[];
+  rows.forEach((row,i)=>{
+    const text=excelDisplay(row&&row[0]);
+    const m=text.match(/^(\d+)\.\s*(.+)$/);
+    if(m) starts.push({index:i,id:m[1],title:m[2]});
+  });
+  const sections=[];
+  let actions=[];
+  let decisions=[];
+  starts.forEach((sec,idx)=>{
+    if(sec.id==='1') return;
+    const end=idx+1<starts.length?starts[idx+1].index:rows.length;
+    const body=rows.slice(sec.index+1,end);
+    let headerIndex=body.findIndex(row=>Array.isArray(row)&&row.filter(v=>excelDisplay(v)!=='').length>=2);
+    if(headerIndex<0){
+      const narrative=body.map(r=>excelDisplay(r&&r[0])).filter(Boolean).join(' ');
+      sections.push({id:sec.id,title:sec.title,rows:[],operational:[],lookAhead:narrative});
+      return;
+    }
+    const headers=body[headerIndex].map(excelDisplay);
+    const dataRows=[]; const narratives=[];
+    body.slice(headerIndex+1).forEach(row=>{
+      if(!rowHasData(row)) return;
+      const nonEmpty=row.filter(v=>excelDisplay(v)!=='').length;
+      if(nonEmpty===1){narratives.push(excelDisplay(row[0]));return;}
+      const obj=rowObject(headers,row);
+      if(Object.values(obj).some(v=>excelDisplay(v)!=='')) dataRows.push(obj);
+    });
+    const item={id:sec.id,title:sec.title,rows:dataRows,operational:[],lookAhead:narratives.join(' ')};
+    sections.push(item);
+    if(sec.id==='8') actions=dataRows;
+    if(sec.id==='9') decisions=dataRows.filter(r=>excelDisplay(r['Record ID'])!=='');
+  });
+  // Fall back to the manual register on CM_PM Operations if the COR output rows
+  // are temporarily blank while Excel recalculates.
+  if(!actions.length){
+    const cm=sheetAoa(wb,'CM_PM Operations');
+    if(cm.length){
+      const header=cm[239]||[]; // Excel row 240
+      actions=cm.slice(240,320).filter(rowHasData).map(r=>rowObject(header,r)).filter(r=>excelDisplay(r['Record ID'])!=='');
+    }
+  }
+  if(!decisions.length){
+    decisions=actions.filter(r=>String(r['COR Decision Required']||r['Decision Required']||'').toLowerCase()==='yes').map(r=>({
+      'Record ID':r['Record ID'],'Title':r['Title'],'Building':r['Building'],
+      'Decision / Action Needed':r['Decision / Action Needed']||r['Decision Required'],
+      'Owner':r['Owner'],'Status':r['Status']
+    }));
+  }
+  return {meta,sections,actions,decisions};
+}
 function statusClass(b){
   const r = Number(b.readinessPct)||0;
   const risks = Number(b['Open Risks'])||0;
@@ -133,7 +216,7 @@ function workbookToData(wb){
   }).filter(Boolean);
 
   const focusRows = focus.map(r => ({...r, Building:normBuilding(first(r,['Building','Building_ID','Building ID']))})).filter(r=>r.Building && buildings.some(b=>b.Building===r.Building)).slice(0,12);
-  return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), loadedAt: new Date().toLocaleString()};
+  return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), corReports: workbookToCorReports(wb), loadedAt: new Date().toLocaleString()};
 }
 // Apply the same correction to the packaged GitHub Pages snapshot.
 data = normalizeSiteRecord(data);
