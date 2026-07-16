@@ -37,7 +37,7 @@
   <button class="rail-btn" type="button" data-rail="meeting" title="Meeting Mode">▣<span class="rail-hint">Meeting Mode</span></button>
   <button class="rail-btn" type="button" data-rail="field" title="Field Mode">☑<span class="rail-hint">Field Mode</span></button>
   <button class="rail-btn" type="button" data-rail="engineering" title="Engineering Mode">⌖<span class="rail-hint">Engineering Mode</span></button>
-  <button class="rail-btn" type="button" data-rail="cor" title="COR Reports" onclick="if(window.openCorReports){window.openCorReports();}">▥<span class="rail-hint">COR Reports</span></button>
+  <button class="rail-btn" type="button" data-rail="cor" id="corReportsRailButton" title="COR Reports">▥<span class="rail-hint">COR Reports</span></button>
   <button class="rail-btn" type="button" data-rail="reports" title="Reports Center">▤<span class="rail-hint">Reports Center</span></button>
   <div class="rail-spacer"></div>
   <button class="rail-btn" type="button" data-rail="about" title="About">i<span class="rail-hint">About</span></button>
@@ -231,14 +231,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="js/data-snapshot.js"></script>
-<script src="js/cor-reports.js"></script>
-<script src="js/app-main.js"></script>
-
-
-
-<div id="corOverlay" class="cor-overlay" aria-label="COR Reports">
+<div id="corOverlay" class="cor-overlay" aria-label="COR Reports" aria-hidden="true" style="display:none;position:fixed;inset:0;z-index:25000">
   <div class="cor-board">
     <div class="cor-top">
       <div><div class="mission-mode-badge"><i class="pulse-dot"></i> COR Reports</div>
@@ -249,6 +242,15 @@
     <div id="corReportsContent"></div>
   </div>
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/data-snapshot.js?v=1.3.2"></script>
+<script src="js/app-main.js?v=1.3.3"></script>
+<script src="js/cor-reports.js?v=1.3.3"></script>
+
+
+
 <div id="reportOverlay" class="report-overlay" aria-label="Reports Center">
   <div class="report-board"><div class="report-board-scroll">
     <div class="report-top">

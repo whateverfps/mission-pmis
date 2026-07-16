@@ -26,3 +26,9 @@ Purpose: prepare Mission PMIS for GitHub Pages, long-term versioning, and stable
 
 ### Rule
 Excel remains the source of truth. The web application remains the presentation layer.
+
+
+## 1.3.0 — COR Reports
+- Dedicated left-rail COR Reports workspace.
+- Current v8.7 mappings for CM_PM Operations and COR_Report.
+- Nine ordered report sections, building filter, copy digest, and print.

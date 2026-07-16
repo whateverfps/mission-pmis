@@ -1,4 +1,5 @@
 let data = window.PMIS_DATA;
+window.data = data;
 
 // SITE guard: the packaged snapshot in v1.2.4 omitted SITE from the building
 // collection while the focus queue still contained a SITE record. Normalize the
@@ -146,6 +147,7 @@ async function loadWorkbookFile(file){
     const next = normalizeSiteRecord(workbookToData(wb));
     if(!next.buildings.length) throw new Error('PMIS_Data did not return building rows.');
     data = next;
+    window.data = data;
     selected = data.buildings.find(b=>b.Building===selected)?.Building || data.buildings[0].Building;
     renderAll(true);
     setSource(`Live workbook loaded: ${file.name} • ${data.buildings.length} buildings • ${data.loadedAt}`, 'good');
@@ -489,7 +491,7 @@ Questions: ${b['Open Questions']||0}
 Action: ${b['Next Action']||b['Major Blocker']||'Verify field conditions and update workbook.'}`;
   try{await navigator.clipboard.writeText(txt);}catch(e){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFieldMode(); if(typeof closeMeetingMode==='function')closeMeetingMode(); if(typeof closeEngineeringMode==='function')closeEngineeringMode(); if(typeof closeReportsMode==='function')closeReportsMode();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFieldMode(); if(typeof closeMeetingMode==='function')closeMeetingMode(); if(typeof closeEngineeringMode==='function')closeEngineeringMode(); if(typeof closeReportsMode==='function')closeReportsMode(); if(typeof closeCorWorkspace==='function')closeCorWorkspace();}});
 
 function renderFocus(){ $('focusList').innerHTML=(data.focus||[]).map(f=>`<div class="focus-item"><strong>Building ${f.Building}</strong> <span class="badge">Priority ${Number(f.Priority||f['Priority Score']||0).toFixed(2)}</span><p>${esc(f['Driver / Major Blocker']||f['Why Summary']||f['Major Blocker']||'')}</p><p class="mini">${esc(f['Recommended Action']||f['Next Action']||'')}</p></div>`).join(''); }
 function renderAll(reset=true){renderKpis();if(reset)renderSelect();renderTiles();renderCampusMap();renderDetail();renderFocus();renderCommandBrief();renderCommandHud();renderActivityFeed();renderFieldMode();}
@@ -540,6 +542,50 @@ document.querySelectorAll('.mission-ribbon [data-nav]').forEach(btn=>btn.addEven
 function openAbout(){const o=document.getElementById('aboutOverlay'); if(o) o.classList.add('show');}
 function closeAbout(){const o=document.getElementById('aboutOverlay'); if(o) o.classList.remove('show');}
 function activateRail(name){document.querySelectorAll('.app-rail [data-rail]').forEach(btn=>btn.classList.toggle('active',btn.dataset.rail===name));}
+
+// COR Reports is a true modal workspace. Force it hidden during normal page load,
+// then reveal it only from the left-rail button. Inline styles make this reliable
+// even when GitHub Pages serves an older cached stylesheet.
+function initializeCorWorkspace(){
+  const overlay=document.getElementById('corOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  Object.assign(overlay.style,{
+    display:'none', position:'fixed', inset:'0', zIndex:'25000',
+    overflow:'auto', background:'rgba(4,10,20,.96)', padding:'22px 26px 40px 96px'
+  });
+}
+function openCorWorkspace(){
+  const overlay=document.getElementById('corOverlay');
+  if(!overlay){ console.error('COR Reports overlay not found.'); return; }
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden','false');
+  overlay.style.display='block';
+  document.body.style.overflow='hidden';
+  try{
+    if(typeof window.renderCorReports==='function') window.renderCorReports();
+    else {
+      const host=document.getElementById('corReportsContent');
+      if(host) host.innerHTML='<div class="cor-summary"><h3>COR Reports</h3><p>The reporting module did not load. Refresh the page after the GitHub Pages deployment completes.</p></div>';
+    }
+  }catch(err){
+    console.error('COR Reports render failed',err);
+    const host=document.getElementById('corReportsContent');
+    if(host) host.innerHTML='<div class="cor-summary"><h3>COR Reports opened</h3><p>Report rendering failed: '+esc(err.message||err)+'</p></div>';
+  }
+}
+function closeCorWorkspace(){
+  const overlay=document.getElementById('corOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+  overlay.style.display='none';
+  document.body.style.overflow='';
+}
+window.openCorReports=openCorWorkspace;
+window.closeCorReports=closeCorWorkspace;
+initializeCorWorkspace();
 document.querySelectorAll('.app-rail [data-rail]').forEach(btn=>btn.addEventListener('click',()=>{
   const name=btn.dataset.rail;
   activateRail(name);
@@ -548,6 +594,7 @@ document.querySelectorAll('.app-rail [data-rail]').forEach(btn=>btn.addEventList
   if(name==='field') return openFieldMode();
   if(name==='engineering') return openEngineeringMode();
   if(name==='reports') return openReportsMode();
+  if(name==='cor') return openCorWorkspace();
   if(name==='about') return openAbout();
 }));
 
