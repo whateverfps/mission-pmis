@@ -37,6 +37,7 @@
   <button class="rail-btn" type="button" data-rail="meeting" title="Meeting Mode">▣<span class="rail-hint">Meeting Mode</span></button>
   <button class="rail-btn" type="button" data-rail="field" title="Field Mode">☑<span class="rail-hint">Field Mode</span></button>
   <button class="rail-btn" type="button" data-rail="engineering" title="Engineering Mode">⌖<span class="rail-hint">Engineering Mode</span></button>
+  <button class="rail-btn" type="button" data-rail="cor" title="COR Reports">▥<span class="rail-hint">COR Reports</span></button>
   <button class="rail-btn" type="button" data-rail="reports" title="Reports Center">▤<span class="rail-hint">Reports Center</span></button>
   <div class="rail-spacer"></div>
   <button class="rail-btn" type="button" data-rail="about" title="About">i<span class="rail-hint">About</span></button>
@@ -235,6 +236,18 @@
 <script src="js/app-main.js"></script>
 
 
+
+<div id="corOverlay" class="cor-overlay" aria-label="COR Reports">
+  <div class="cor-board">
+    <div class="cor-top">
+      <div><div class="mission-mode-badge"><i class="pulse-dot"></i> COR Reports</div>
+      <h2>Project 518-22-700 — COR Reporting Center</h2>
+      <p>Digestible reporting generated from CM_PM Operations and COR_Report.</p></div>
+      <div class="cor-actions"><button class="report-btn" onclick="copyCorDigest()">Copy Digest</button><button class="report-btn primary" onclick="printCorReport()">Print</button><button class="report-btn meeting-close-x" onclick="closeCorReports()">×</button></div>
+    </div>
+    <div id="corReportsContent"></div>
+  </div>
+</div>
 <div id="reportOverlay" class="report-overlay" aria-label="Reports Center">
   <div class="report-board"><div class="report-board-scroll">
     <div class="report-top">
@@ -281,6 +294,7 @@
 
 
 <script src="js/reports-center.js"></script>
+<script src="js/cor-reports.js"></script>
 
 </body>
 </html>

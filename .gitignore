@@ -1,0 +1,21 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# Local data / private workbooks
+*.xlsx
+*.xlsm
+*.xls
+~$*
+/data/*.xlsx
+/data/*.xlsm
+
+# Temporary / build artifacts
+*.tmp
+*.bak
+*.log
+node_modules/
+dist/
+build/
