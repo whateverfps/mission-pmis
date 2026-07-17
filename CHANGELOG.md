@@ -1,6 +1,14 @@
 # Changelog
+## 1.3.8 — Empty Shell Release
 
-## 1.3.7 — Reporting Production Pass
+- Removed the bundled Bedford workbook from the GitHub stack.
+- Removed packaged project data from the JavaScript snapshot.
+- Mission PMIS now opens as a clean shell with zero project records.
+- Dashboard, reports, registers, and shutdown data populate only after the user loads an Excel workbook.
+- Updated status messaging so failed imports do not fall back to stale data.
+
+
+## 1.3.8 — Reporting Production Pass
 - Added dedicated, multi-page print documents for Reports Center and COR Reports.
 - Added consistent report headers, project identification, generated date, and footer branding.
 - Removed dashboard navigation and controls from printed reports.

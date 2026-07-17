@@ -1,4 +1,4 @@
-let data = window.PMIS_DATA;
+let data = window.PMIS_DATA || {buildings:[], focus:[], stats:{total:0,avgReadiness:0,ready:0,notReady:0,risks:0,questions:0}, corReports:null, projectRegister:[], shutdowns:[], loadedAt:''};
 window.data = data;
 
 // SITE guard: the packaged snapshot in v1.2.4 omitted SITE from the building
@@ -8,6 +8,10 @@ window.data = data;
 function normalizeSiteRecord(dataset){
   if(!dataset) dataset={};
   if(!Array.isArray(dataset.buildings)) dataset.buildings=[];
+  if(dataset.buildings.length===0){
+    dataset.stats=buildStats(dataset.buildings);
+    return dataset;
+  }
   let site=dataset.buildings.find(b=>String(b?.Building||'').trim().toUpperCase().replace(/^B/,'')==='SITE');
   if(!site){
     site={
@@ -185,12 +189,12 @@ function workbookToData(wb){
   const corReports=workbookToCorReports(wb);
   return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), corReports, projectRegister:corReports?.projectRegister||[], shutdowns:corReports?.shutdowns||[], loadedAt: new Date().toLocaleString()};
 }
-// Apply the same correction to the packaged GitHub Pages snapshot.
+// Normalize the empty shell or the currently loaded workbook data.
 data = normalizeSiteRecord(data);
 selected = data.buildings.find(b=>b.Building===selected)?.Building || data.buildings[0]?.Building;
 
 async function loadWorkbookFile(file){
-  if(!window.XLSX){ setSource('Excel reader did not load. Check internet or use the packaged snapshot.', 'bad'); return; }
+  if(!window.XLSX){ setSource('Excel reader did not load. Check your internet connection, then reload the page.', 'bad'); return; }
   try{
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, {type:'array', cellDates:true});
@@ -201,7 +205,7 @@ async function loadWorkbookFile(file){
     selected = data.buildings.find(b=>b.Building===selected)?.Building || data.buildings[0].Building;
     renderAll(true);
     setSource(`Live workbook loaded: ${file.name} • ${data.buildings.length} buildings • ${data.loadedAt}`, 'good');
-  }catch(e){ console.error(e); setSource(`Could not read workbook: ${e.message}. The page is still using the packaged snapshot.`, 'bad'); }
+  }catch(e){ console.error(e); setSource(`Could not read workbook: ${e.message}. No workbook data was loaded.`, 'bad'); }
 }
 function setSource(msg, cls=''){
   const el=$('sourceStatus'); el.textContent=msg; el.className='source-status '+cls;
@@ -667,9 +671,11 @@ const dz=$('dropZone');
 ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('hot');}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('hot');}));
 dz.addEventListener('drop', e => { const file=e.dataTransfer.files[0]; if(file) loadWorkbookFile(file); });
-async function loadBundledWorkbook(){
-  if(!window.XLSX)return;
-  try{const response=await fetch('data/Bedford_VA_EHRM_PMIS_MASTER_v8.8.xlsx',{cache:'no-store'});if(!response.ok)throw new Error(`HTTP ${response.status}`);const buf=await response.arrayBuffer();const wb=XLSX.read(buf,{type:'array',cellDates:true});const next=normalizeSiteRecord(workbookToData(wb));if(!next.buildings.length)throw new Error('PMIS_Data did not return building rows.');data=next;window.data=data;selected=data.buildings.find(b=>b.Building===selected)?.Building||data.buildings[0].Building;renderAll(true);setSource(`Bundled v8.8 workbook loaded • ${data.buildings.length} buildings • Project Register ${data.projectRegister.length} records • Shutdown Tracker ${data.shutdowns.length} records`,'good');}catch(err){console.warn('Bundled workbook load failed; using packaged snapshot.',err);}
+function initializeEmptyShell(){
+  data={buildings:[],focus:[],stats:buildStats([]),corReports:null,projectRegister:[],shutdowns:[],loadedAt:''};
+  window.data=data;
+  selected=undefined;
+  renderAll(true);
+  setSource('No workbook loaded • Select or drop a PMIS Excel workbook to begin.','');
 }
-renderAll();
-loadBundledWorkbook();
+initializeEmptyShell();

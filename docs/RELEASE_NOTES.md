@@ -1,4 +1,8 @@
-# Mission PMIS 1.3.7
+# Mission PMIS 1.3.8 — Empty Shell
+
+This release contains no Bedford project workbook and no packaged project records. The application remains empty until a user selects or drops a compatible PMIS Excel workbook. Report and operational views populate from that workbook only.
+
+# Mission PMIS 1.3.8
 
 This release completes a production pass on the reporting module. Reports now open in dedicated print layouts designed for clean multi-page PDF or paper output. COR reports respect the current building filter, omit empty sections, and use a consistent professional header and footer.
 

@@ -60,3 +60,8 @@ Host the app as a link. Users open the link and load the latest workbook locally
 
 ### Option 3 — Future desktop wrapper
 Package the same HTML app into a desktop-style launcher.
+
+
+## Empty-shell behavior
+
+No project workbook or project data is bundled. The interface populates only after a compatible Excel workbook is loaded.
