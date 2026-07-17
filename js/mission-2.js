@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='2.0.3';
+const VERSION='2.0.4';
 const $=id=>document.getElementById(id);
 const esc2=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const num=v=>Number(v)||0;

@@ -1,5 +1,13 @@
 # Mission PMIS Changelog
 
+## 2.0.4 — Deployment Cleanup
+- Removed stale 1.2.2 and “Wow Polish” product labels.
+- Removed “packaged workbook snapshot” wording and the packaged snapshot script.
+- Replaced Bedford-only startup, help, About, map, COR, and report labels with project-neutral language.
+- Added dynamic project identity based on the loaded workbook filename.
+- Updated generated reports and briefing headers to use the loaded project identity.
+- Updated all production cache references and visible version labels to 2.0.4.
+
 ## 2.0.3 — Purpose-Built Reports
 - Executive Brief now renders leadership health, decisions required, management attention, and two-week look-ahead.
 - CM/PM Operations now renders active deliverables, owners, due dates, overdue items, commissioning, pay applications, and shutdown coordination.

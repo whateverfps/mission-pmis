@@ -60,7 +60,7 @@ function executiveForecast(b){
 }
 function meetingBriefText(){
   const c=execCampusStatus(); const b=selectedBuilding()||{}; const [tone,headline]=execStatusSummary(b); const forecast=executiveForecast(b);
-  return `Mission PMIS Executive Brief\nBedford VA Medical Center\nGenerated: ${new Date().toLocaleString()}\n\nMission Status: ${headline}\nCampus Readiness: ${c.avg}%\nBuildings: ${c.total} tracked | ${c.ready} ready | ${c.watch} watch | ${c.critical} critical\nOpen Risks: ${c.risks}\nOpen Questions: ${c.questions}\n\nSelected Building: ${execLabel(b)}\nReadiness: ${pct(b.readinessPct||0)}%\nRisks: ${b['Open Risks']||0}\nQuestions: ${b['Open Questions']||0}\nForecast: ${forecast.confidence}% confidence — ${forecast.trend}\n\nReadiness Blockers:\n- ${executiveBlockers(b).join('\n- ')}\n\nExecutive Actions:\n- ${executiveActions(b).join('\n- ')}`;
+  return `Mission PMIS Executive Brief\n${window.missionProjectLabel?.()||'Loaded Project Workbook'}\nGenerated: ${new Date().toLocaleString()}\n\nMission Status: ${headline}\nCampus Readiness: ${c.avg}%\nBuildings: ${c.total} tracked | ${c.ready} ready | ${c.watch} watch | ${c.critical} critical\nOpen Risks: ${c.risks}\nOpen Questions: ${c.questions}\n\nSelected Building: ${execLabel(b)}\nReadiness: ${pct(b.readinessPct||0)}%\nRisks: ${b['Open Risks']||0}\nQuestions: ${b['Open Questions']||0}\nForecast: ${forecast.confidence}% confidence — ${forecast.trend}\n\nReadiness Blockers:\n- ${executiveBlockers(b).join('\n- ')}\n\nExecutive Actions:\n- ${executiveActions(b).join('\n- ')}`;
 }
 function renderMeetingMode(){
   const c=execCampusStatus(); const b=selectedBuilding()||{}; const [tone,headline,subline]=execStatusSummary(b); const forecast=executiveForecast(b);

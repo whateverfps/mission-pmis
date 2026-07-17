@@ -1,6 +1,22 @@
 let data = window.PMIS_DATA || {buildings:[], focus:[], stats:{total:0,avgReadiness:0,ready:0,notReady:0,risks:0,questions:0}, corReports:null, projectRegister:[], shutdowns:[], loadedAt:''};
 window.data = data;
 
+window.missionProjectLabel = function(){
+  const raw=String(window.data?.sourceFileName||'').replace(/\.(xlsx|xlsm|xls)$/i,'').trim();
+  if(!raw)return 'Loaded Project Workbook';
+  return raw.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+};
+window.refreshProjectIdentity = function(){
+  const label=window.missionProjectLabel();
+  const eyebrow=document.getElementById('projectEyebrow');
+  if(eyebrow)eyebrow.textContent=label;
+  const about=document.getElementById('aboutProjectName');
+  if(about)about.textContent=label;
+  const mapTitle=document.getElementById('campusMapTitle');
+  if(mapTitle)mapTitle.textContent=label==='Loaded Project Workbook'?'Project Campus Map':`${label} · Campus Map`;
+};
+
+
 // SITE guard: the packaged snapshot in v1.2.4 omitted SITE from the building
 // collection while the focus queue still contained a SITE record. Normalize the
 // record here and after every workbook import so the dashboard cannot inherit a
@@ -211,12 +227,14 @@ async function loadWorkbookFile(file){
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, {type:'array', cellDates:true});
     const next = normalizeSiteRecord(workbookToData(wb));
+    next.sourceFileName=file.name;
     if(!next.buildings.length) throw new Error('PMIS_Data did not return building rows.');
     data = next;
     window.data = data;
     window.getMissionData = ()=>data;
     selected = data.buildings.find(b=>b.Building===selected)?.Building || data.buildings[0].Building;
     renderAll(true);
+    window.refreshProjectIdentity?.();
     setSource(`Live workbook loaded: ${file.name} • ${data.buildings.length} buildings • ${data.loadedAt}`, 'good');
   }catch(e){ console.error(e); setSource(`Could not read workbook: ${e.message}. No workbook data was loaded.`, 'bad'); }
 }
@@ -286,7 +304,7 @@ function updateMapModeUI(){
   const img=$('campusMapImage'); const note=$('engineeringNote');
   // Keep the campus map fixed as the navigation layer.
   // Engineering Site Plan now lives in Engineering Mode so it does not shrink/replace the clickable map.
-  if(img){ img.src = 'assets/campus_map-2.png'; img.alt = 'Bedford VA campus map'; }
+  if(img){ img.src = 'assets/campus_map-2.png'; img.alt = 'Project campus map'; }
   if(note) note.style.display = mapMode==='engineering' ? 'block' : 'none';
 }
 function jumpToDetail(title){

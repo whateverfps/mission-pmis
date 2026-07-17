@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Mission PMIS</title>
   <link rel="icon" href="assets/mission_pmis.ico"/>
-  <link rel="stylesheet" href="css/app.css?v=2.0.3"/>
-  <link rel="stylesheet" href="css/app-v2.css?v=2.0.3"/>
+  <link rel="stylesheet" href="css/app.css?v=2.0.4"/>
+  <link rel="stylesheet" href="css/app-v2.css?v=2.0.4"/>
 
 </head>
 <body>
@@ -15,7 +15,7 @@
   <div class="launch-card">
     <img class="launch-logo" src="assets/mission_pmis_icon.png" alt="Mission PMIS icon"/>
     <h1 class="launch-title">Mission PMIS</h1>
-    <div class="launch-sub">Engineering Operations Platform · Bedford VA Medical Center</div>
+    <div class="launch-sub">Owner Project Management Information System</div>
     <div class="launch-bar"><span></span></div>
     <div class="launch-steps">
       <div>Reading PMIS_Data...</div>
@@ -47,7 +47,7 @@
 <div class="shell">
   <header class="hero">
     <div class="app-brand"><img src="assets/mission_pmis_icon.png" alt="Mission PMIS icon"/><div>
-      <div class="eyebrow">BEDFORD VA MEDICAL CENTER</div>
+      <div class="eyebrow" id="projectEyebrow">OWNER PROJECT MANAGEMENT INFORMATION SYSTEM</div>
       <h1>Mission PMIS</h1>
       <p class="hero-statement">Engineering operations workspace powered by the Excel PMIS workbook.</p>
     </div></div>
@@ -60,7 +60,7 @@
         <small>.xlsx from your computer</small>
       </label>
       <input id="workbookInput" class="hidden-file" type="file" accept=".xlsx,.xlsm,.xls"/>
-      <div id="sourceStatus" class="source-status">Using packaged workbook snapshot.</div>
+      <div id="sourceStatus" class="source-status">No workbook loaded.</div>
     </div>
   </header>
 
@@ -83,7 +83,7 @@
     <section class="panel campus-panel" id="campusSection">
       <div class="map-toolbar">
         <div class="map-title">
-          <h2>Bedford VA Campus Map</h2>
+          <h2 id="campusMapTitle">Project Campus Map</h2>
           <p>Click a building marker to load the selected building source detail.</p>
         </div>
         <div>
@@ -110,7 +110,7 @@
       <div id="campusIntelligence" class="campus-intelligence"></div>
       <div id="decisionStrip" class="decision-strip"></div>
       <div class="campus-map-wrap" id="campusMapWrap">
-        <img id="campusMapImage" class="campus-map" src="assets/campus_map-2.png" alt="Bedford VA campus map"/>
+        <img id="campusMapImage" class="campus-map" src="assets/campus_map-2.png" alt="Project campus map"/>
         <div id="campusHotspots"></div>
         <div id="engineeringNote" class="engineering-note" style="display:none"><strong>Engineering Reference</strong>This view brings the site features / parking plan into the same interface. Keep using the building selector or operations map markers to drive the Excel detail panel.</div>
       </div>
@@ -194,7 +194,7 @@
     <div class="panel">
       <div class="panel-head"><h2>How this works</h2><span class="mini">No Python needed</span></div>
       <p class="note"><b>Important:</b> use the extracted folder, not the file opened inside the zip preview. Open <b>index.html</b>, then use <b>Load Excel Workbook</b> or drag the workbook onto the page.</p>
-      <div class="codebox">1. Right-click zip → Extract All<br/>2. Open the extracted folder<br/>3. Double-click index.html<br/>4. Load your current Bedford VA EHRM PMIS workbook</div>
+      <div class="codebox">1. Right-click zip → Extract All<br/>2. Open the extracted folder<br/>3. Double-click index.html<br/>4. Load a compatible Mission PMIS workbook</div>
     </div>
   </section>
 </div>
@@ -223,8 +223,8 @@
     <h2>Engineering Operations Platform</h2>
     <p>Mission PMIS is a standalone application-style interface powered by the Excel PMIS workbook. The workbook remains the source of truth; this front end organizes the project through the campus map, building workspace, and briefing modes.</p>
     <div class="about-grid">
-      <div class="about-item"><span>Version</span><strong>1.2.2 Wow Polish</strong></div>
-      <div class="about-item"><span>Project</span><strong>Bedford VA EHRM</strong></div>
+      <div class="about-item"><span>Version</span><strong>2.0.4</strong></div>
+      <div class="about-item"><span>Project</span><strong id="aboutProjectName">Loaded workbook</strong></div>
       <div class="about-item"><span>Backend</span><strong>Excel PMIS_Data / Assessment Sheets</strong></div>
       <div class="about-item"><span>Interface</span><strong>Standalone Local HTML Application</strong></div>
     </div>
@@ -236,7 +236,7 @@
   <div class="cor-board">
     <div class="cor-top">
       <div><div class="mission-mode-badge"><i class="pulse-dot"></i> COR Reports</div>
-      <h2>Project 518-22-700 — COR Reporting Center</h2>
+      <h2>COR Reporting Center</h2>
       <p>Nonredundant reporting generated from PMIS assessments, Project Register, and Shutdown Tracker.</p></div>
       <div class="cor-actions"><button class="report-btn" onclick="copyCorDigest()">Copy Digest</button><button class="report-btn primary" onclick="printCorReport()">Print</button><button class="report-btn meeting-close-x" onclick="closeCorReports()">×</button></div>
     </div>
@@ -246,9 +246,8 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="js/data-snapshot.js?v=2.0.0"></script>
-<script src="js/app-main.js?v=2.0.0"></script>
-<script src="js/cor-reports.js?v=2.0.0"></script>
+<script src="js/app-main.js?v=2.0.4"></script>
+<script src="js/cor-reports.js?v=2.0.4"></script>
 
 
 
@@ -297,8 +296,8 @@
 <script src="js/engineering-mode.js"></script>
 
 
-<script src="js/reports-center.js?v=2.0.3"></script>
+<script src="js/reports-center.js?v=2.0.4"></script>
 
-<script src="js/mission-2.js?v=2.0.3"></script>
+<script src="js/mission-2.js?v=2.0.4"></script>
 </body>
 </html>

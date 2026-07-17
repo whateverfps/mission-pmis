@@ -17,7 +17,7 @@ function allBuildingsReportText(){
   const s=data.stats||{};
   const lines=[];
   lines.push('Mission PMIS All Buildings Report');
-  lines.push('Bedford VA Medical Center');
+  lines.push(window.missionProjectLabel?.()||'Loaded Project Workbook');
   lines.push(`Generated: ${new Date().toLocaleString()}`);
   lines.push('');
   lines.push(`Campus Readiness: ${pct(s.avgReadiness||0)}%`);
@@ -156,7 +156,7 @@ function printHtmlDocument(title, bodyHtml, options={}){
     .empty{color:#68798b;font-style:italic;padding:8px 0}.status-line{font-size:9pt;color:#53657a;margin:0 0 10px}.report-pre{white-space:pre-wrap;font-family:Arial,Helvetica,sans-serif;font-size:10pt;margin:0}
     .print-footer{position:fixed;bottom:-12mm;left:0;right:0;border-top:1px solid #aebdcb;padding-top:4px;font-size:7.5pt;color:#65788e;display:flex;justify-content:space-between}.screen-only{display:none!important}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.print-shell{width:100%}.print-header{margin-top:0}.no-print{display:none!important}}
-  </style></head><body><div class="print-shell"><header class="print-header"><div><div class="brand">Mission PMIS</div><h1>${esc(reportType)}</h1><div class="subtitle">VA Bedford EHRM · Project 518-22-700</div></div><div class="header-meta">Generated: ${esc(generated)}<br>Prepared by: ${esc(preparedBy)}</div></header>${bodyHtml}<footer class="print-footer"><span>Mission PMIS · Owner Project Management Information System</span><span>Version 2.0.3</span></footer></div><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),350));<\/script></body></html>`);
+  </style></head><body><div class="print-shell"><header class="print-header"><div><div class="brand">Mission PMIS</div><h1>${esc(reportType)}</h1><div class="subtitle">${esc(window.missionProjectLabel?.()||"Loaded Project Workbook")}</div></div><div class="header-meta">Generated: ${esc(generated)}<br>Prepared by: ${esc(preparedBy)}</div></header>${bodyHtml}<footer class="print-footer"><span>Mission PMIS · Owner Project Management Information System</span><span>Version 2.0.4</span></footer></div><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),350));<\/script></body></html>`);
   w.document.close();
 }
 function printSelectedReport(){

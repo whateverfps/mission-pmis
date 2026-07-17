@@ -465,7 +465,7 @@ button{user-select:none;}
 .eng-checks span{border:1px solid rgba(103,232,249,.22);background:rgba(103,232,249,.06);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:850;color:#dffbff;}
 @media(max-width:1100px){.engineering-grid-clean{grid-template-columns:1fr}.engineering-side-clean{max-height:none}.engineering-plan.landscape{height:520px}.eng-trade-grid{grid-template-columns:1fr}}
 
-/* Mission PMIS 1.2.2 — Wow Polish / Visual Professional Pass
+/* Mission PMIS — Visual Professional Pass
    Presentation-only changes. Excel/data logic untouched. */
 :root{
   --accent:#67e8f9;
