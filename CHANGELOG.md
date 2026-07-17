@@ -53,3 +53,10 @@ Prepared Mission PMIS for GitHub Pages, version control, stable releases, and lo
 - CM_PM Operations remains the reporting layer for assessment-derived Sections 1–7.
 - COR report sections and Executive Summary now open as collapsed dropdown panels.
 - Added Expand All and Collapse All controls; printing expands all sections automatically.
+## 2.0.0
+- Added project-neutral workbook loading gate.
+- Added global project search.
+- Added Project Health owner view.
+- Added tabbed Building Workspace.
+- Expanded report launch center.
+- Preserved empty-shell behavior until a workbook is loaded.
