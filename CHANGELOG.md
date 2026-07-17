@@ -25,3 +25,12 @@ Prepared Mission PMIS for GitHub Pages, version control, stable releases, and lo
 - COR Reports now reads full 30-building section ranges from CM_PM Operations.
 - COR_Report remains the concise printable summary instead of limiting the web view.
 - All assessment, risk, quality, design, and commissioning rows are available in the COR workspace.
+
+## 1.3.6 — Register Architecture & COR Accordions
+- Bundled Bedford VA EHRM PMIS v8.8 as the current Excel source.
+- Front end now loads the bundled workbook automatically on GitHub Pages.
+- Project_Register is the direct source for COR Sections 8 and 9.
+- Shutdown_Tracker is the direct source for active shutdown records.
+- CM_PM Operations remains the reporting layer for assessment-derived Sections 1–7.
+- COR report sections and Executive Summary now open as collapsed dropdown panels.
+- Added Expand All and Collapse All controls; printing expands all sections automatically.

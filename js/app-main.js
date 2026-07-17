@@ -90,71 +90,38 @@ function rowObject(headers,row){
   headers.forEach((h,i)=>{const key=excelDisplay(h);if(key)out[key]=row[i]??'';});
   return out;
 }
+function workbookTable(wb,name,requiredHeaders=[]){
+  const rows=sheetAoa(wb,name); if(!rows.length) return [];
+  const wanted=requiredHeaders.map(x=>String(x).toLowerCase());
+  let hi=rows.findIndex(row=>{const cells=row.map(x=>excelDisplay(x).toLowerCase());return wanted.every(h=>cells.includes(h));});
+  if(hi<0)return []; const headers=rows[hi].map((h,i)=>excelDisplay(h)||`col${i+1}`);
+  return rows.slice(hi+1).filter(rowHasData).map(r=>rowObject(headers,r));
+}
 function workbookToCorReports(wb){
-  const cor=sheetAoa(wb,'COR_Report');
-  const cm=sheetAoa(wb,'CM_PM Operations');
-  if(!cor.length && !cm.length) return null;
+  const cor=sheetAoa(wb,'COR_Report'), cm=sheetAoa(wb,'CM_PM Operations');
+  const projectRegister=workbookTable(wb,'Project_Register',['Record ID','Record Type','Title']);
+  const shutdowns=workbookTable(wb,'Shutdown_Tracker',['Shutdown ID','System','Building']);
+  if(!cor.length&&!cm.length&&!projectRegister.length)return null;
   const get=(rows,r,c)=>excelDisplay((rows[r-1]||[])[c-1]);
-  const meta={
-    reportType:get(cor,4,2)||get(cm,6,4)||'Weekly',
-    periodStart:get(cor,4,4)||get(cm,7,2),
-    preparedBy:get(cor,5,2)||get(cm,8,2),
-    periodEnd:get(cor,5,4)||get(cm,7,4),
-    reviewedWith:get(cor,6,2)||get(cm,8,4),
-    selectedBuilding:get(cor,6,4)||get(cm,6,2),
-    projectPhase:get(cor,7,2)||'Project Status',
-    contractorSchedule:get(cor,7,4)||'Pending',
-    reportSource:get(cor,8,2)||'PMIS assessments + CM/PM Operations',
-    executiveSummary:get(cor,15,1)
-  };
-
-  function rowsFromRange(headerRow,startRow,endRow){
-    if(!cm.length) return [];
-    const header=cm[headerRow-1]||[];
-    return cm.slice(startRow-1,endRow)
-      .filter(rowHasData)
-      .map(r=>rowObject(header,r))
-      .filter(r=>Object.values(r).some(v=>excelDisplay(v)!==''));
-  }
-  function meaningfulRecords(rows){
-    return rows.filter(r=>{
-      const vals=Object.values(r).map(excelDisplay).filter(Boolean);
-      if(!vals.length) return false;
-      return !vals.every(v=>['0','0%','01/00/1900','1/0/1900','N/A','None'].includes(v));
-    });
-  }
-
-  // Pull the complete campus-wide data directly from CM_PM Operations.
-  // COR_Report is intentionally a concise printable view and only carries the first
-  // 12 buildings in several sections; using it as the application data source caused
-  // the remaining buildings to be cut off.
+  const meta={reportType:get(cor,4,2)||get(cm,6,4)||'Weekly',periodStart:get(cor,4,4)||get(cm,7,2),preparedBy:get(cor,5,2)||get(cm,8,2),periodEnd:get(cor,5,4)||get(cm,7,4),reviewedWith:get(cor,6,2)||get(cm,8,4),selectedBuilding:get(cor,6,4)||get(cm,6,2),projectPhase:get(cor,7,2)||'Project Status',contractorSchedule:get(cor,7,4)||'Pending',reportSource:'PMIS assessments + Project Register + Shutdown Tracker',executiveSummary:get(cor,15,1)};
+  function rowsFromRange(headerRow,startRow,endRow){if(!cm.length)return[];const header=cm[headerRow-1]||[];return cm.slice(startRow-1,endRow).filter(rowHasData).map(r=>rowObject(header,r));}
+  function meaningfulRecords(rows){return rows.filter(r=>{const vals=Object.values(r).map(excelDisplay).filter(Boolean);return vals.length&&!vals.every(v=>['0','0%','01/00/1900','1/0/1900','N/A','None'].includes(v));});}
   const sections=[];
-  sections.push({id:'1',title:'PROJECT AND ASSESSMENT STATUS',rows:meaningfulRecords(rowsFromRange(16,17,46)),operational:[],lookAhead:''});
-  sections.push({id:'2',title:'FIELD AND INSPECTION ACTIVITY',rows:meaningfulRecords(rowsFromRange(50,51,80)),operational:[],lookAhead:''});
-  sections.push({id:'3',title:'RISKS, DEFICIENCIES, AND OPEN QUESTIONS',rows:meaningfulRecords(rowsFromRange(84,85,114)),operational:[],lookAhead:''});
-  sections.push({id:'4',title:'SCHEDULE, SHUTDOWNS, RELOCATIONS, AND OPERATIONAL IMPACTS',rows:meaningfulRecords(rowsFromRange(118,119,128)),operational:meaningfulRecords(rowsFromRange(130,131,135)),lookAhead:''});
-  sections.push({id:'5',title:'DESIGN AND TECHNICAL COORDINATION',rows:meaningfulRecords(rowsFromRange(138,139,168)),operational:[],lookAhead:''});
-  sections.push({id:'6',title:'QUALITY AND CONSTRUCTION READINESS',rows:meaningfulRecords(rowsFromRange(172,173,202)),operational:[],lookAhead:''});
-  sections.push({id:'7',title:'OIT, COMMISSIONING, TURNOVER, AND ACCEPTANCE',rows:meaningfulRecords(rowsFromRange(206,207,236)),operational:[],lookAhead:''});
-
-  let actions=meaningfulRecords(rowsFromRange(240,241,320)).filter(r=>{
-    const flag=String(r['Include in COR Report']||'').trim().toLowerCase();
-    return !flag || flag==='yes';
-  });
-  sections.push({id:'8',title:'CM/PM DELIVERABLES, ACTIONS, AND CONTRACT ADMINISTRATION',rows:actions,operational:[],lookAhead:''});
-
-  let decisions=meaningfulRecords(rowsFromRange(323,324,331)).filter(r=>excelDisplay(r['Record ID'])!=='');
-  if(!decisions.length){
-    decisions=actions.filter(r=>String(r['COR Decision Required']||r['Decision Required']||'').toLowerCase()==='yes').map(r=>({
-      'Record ID':r['Record ID'],'Title':r['Title'],'Building':r['Building'],
-      'Decision / Action Needed':r['Decision / Action Needed']||r['Decision Required'],
-      'Owner':r['Owner'],'Status':r['Status']
-    }));
-  }
-  const lookAhead=get(cm,334,1)||get(cor,144,1)||'';
-  sections.push({id:'9',title:'COR DECISIONS REQUIRED AND TWO-WEEK LOOK AHEAD',rows:decisions,operational:[],lookAhead});
-
-  return {meta,sections,actions,decisions};
+  sections.push({id:'1',title:'PROJECT AND ASSESSMENT STATUS',source:'CM_PM Operations / PMIS_Data',rows:meaningfulRecords(rowsFromRange(16,17,46)),operational:[],lookAhead:''});
+  sections.push({id:'2',title:'FIELD AND INSPECTION ACTIVITY',source:'CM_PM Operations / Assessment Sheets',rows:meaningfulRecords(rowsFromRange(50,51,80)),operational:[],lookAhead:''});
+  sections.push({id:'3',title:'RISKS, DEFICIENCIES, AND OPEN QUESTIONS',source:'CM_PM Operations / Assessment Sheets',rows:meaningfulRecords(rowsFromRange(84,85,114)),operational:[],lookAhead:''});
+  const activeShutdowns=meaningfulRecords(shutdowns).filter(r=>!['closed','complete','completed','cancelled','canceled'].includes(String(r.Status||'').trim().toLowerCase()));
+  sections.push({id:'4',title:'SCHEDULE, SHUTDOWNS, RELOCATIONS, AND OPERATIONAL IMPACTS',source:'CM_PM Operations + Shutdown Tracker',rows:meaningfulRecords(rowsFromRange(118,119,128)),operational:activeShutdowns,lookAhead:''});
+  sections.push({id:'5',title:'DESIGN AND TECHNICAL COORDINATION',source:'CM_PM Operations / Assessment Sheets',rows:meaningfulRecords(rowsFromRange(138,139,168)),operational:[],lookAhead:''});
+  sections.push({id:'6',title:'QUALITY AND CONSTRUCTION READINESS',source:'CM_PM Operations / Assessment Sheets',rows:meaningfulRecords(rowsFromRange(172,173,202)),operational:[],lookAhead:''});
+  sections.push({id:'7',title:'OIT, COMMISSIONING, TURNOVER, AND ACCEPTANCE',source:'CM_PM Operations / Assessment Sheets',rows:meaningfulRecords(rowsFromRange(206,207,236)),operational:[],lookAhead:''});
+  const actions=meaningfulRecords(projectRegister).filter(r=>String(r['Include in COR Report']||'').trim().toLowerCase()==='yes');
+  sections.push({id:'8',title:'CM/PM DELIVERABLES, ACTIONS, AND CONTRACT ADMINISTRATION',source:'Project_Register',rows:actions,operational:[],lookAhead:''});
+  const decisions=actions.filter(r=>String(r['COR Decision Required']||'').trim().toLowerCase()==='yes').map(r=>({'Record ID':r['Record ID'],'Title':r['Title'],'Building':r['Building'],'Decision / Action Needed':r['Decision / Action Needed'],'Assigned To':r['Assigned To'],'Status':r['Status'],'Priority':r['Priority']}));
+  const lookAheadItems=actions.filter(r=>String(r['Look-Ahead Item']||'').trim().toLowerCase()==='yes').map(r=>r['Decision / Action Needed']||r['Title']).filter(Boolean);
+  const lookAhead=lookAheadItems.length?`Two-week look ahead: ${lookAheadItems.join('; ')}.`:(get(cm,334,1)||get(cor,144,1)||'');
+  sections.push({id:'9',title:'COR DECISIONS REQUIRED AND TWO-WEEK LOOK AHEAD',source:'Project_Register',rows:decisions,operational:[],lookAhead});
+  return {meta,sections,actions,decisions,projectRegister,shutdowns};
 }
 function statusClass(b){
   const r = Number(b.readinessPct)||0;
@@ -215,7 +182,8 @@ function workbookToData(wb){
   }).filter(Boolean);
 
   const focusRows = focus.map(r => ({...r, Building:normBuilding(first(r,['Building','Building_ID','Building ID']))})).filter(r=>r.Building && buildings.some(b=>b.Building===r.Building)).slice(0,12);
-  return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), corReports: workbookToCorReports(wb), loadedAt: new Date().toLocaleString()};
+  const corReports=workbookToCorReports(wb);
+  return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), corReports, projectRegister:corReports?.projectRegister||[], shutdowns:corReports?.shutdowns||[], loadedAt: new Date().toLocaleString()};
 }
 // Apply the same correction to the packaged GitHub Pages snapshot.
 data = normalizeSiteRecord(data);
@@ -699,4 +667,9 @@ const dz=$('dropZone');
 ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('hot');}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('hot');}));
 dz.addEventListener('drop', e => { const file=e.dataTransfer.files[0]; if(file) loadWorkbookFile(file); });
+async function loadBundledWorkbook(){
+  if(!window.XLSX)return;
+  try{const response=await fetch('data/Bedford_VA_EHRM_PMIS_MASTER_v8.8.xlsx',{cache:'no-store'});if(!response.ok)throw new Error(`HTTP ${response.status}`);const buf=await response.arrayBuffer();const wb=XLSX.read(buf,{type:'array',cellDates:true});const next=normalizeSiteRecord(workbookToData(wb));if(!next.buildings.length)throw new Error('PMIS_Data did not return building rows.');data=next;window.data=data;selected=data.buildings.find(b=>b.Building===selected)?.Building||data.buildings[0].Building;renderAll(true);setSource(`Bundled v8.8 workbook loaded • ${data.buildings.length} buildings • Project Register ${data.projectRegister.length} records • Shutdown Tracker ${data.shutdowns.length} records`,'good');}catch(err){console.warn('Bundled workbook load failed; using packaged snapshot.',err);}
+}
 renderAll();
+loadBundledWorkbook();
