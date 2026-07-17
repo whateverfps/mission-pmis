@@ -187,7 +187,19 @@ function workbookToData(wb){
 
   const focusRows = focus.map(r => ({...r, Building:normBuilding(first(r,['Building','Building_ID','Building ID']))})).filter(r=>r.Building && buildings.some(b=>b.Building===r.Building)).slice(0,12);
   const corReports=workbookToCorReports(wb);
-  return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), corReports, projectRegister:corReports?.projectRegister||[], shutdowns:corReports?.shutdowns||[], loadedAt: new Date().toLocaleString()};
+  const assessmentIndex=[];
+  wb.SheetNames.filter(n=>/assessment/i.test(n)).forEach(sheetName=>{
+    const aoa=sheetAoa(wb,sheetName);
+    const building=normBuilding((sheetName.match(/^B?([0-9]+|BCH|MCR|SITE|SPEC)/i)||[])[1]||sheetName);
+    aoa.forEach((row,rowIndex)=>{
+      const values=(row||[]).map(excelDisplay).filter(Boolean);
+      if(!values.length)return;
+      const text=values.join(' | ');
+      const roomTokens=[...new Set((text.match(/\b(?:TR|ROOM|RM)?\s*[A-Z]*\d+[A-Z0-9\/-]*\b/gi)||[]).map(x=>x.replace(/\s+/g,'').toUpperCase()))];
+      assessmentIndex.push({building,sheet:sheetName,row:rowIndex+1,text,roomTokens});
+    });
+  });
+  return {buildings, focus: focusRows.length ? focusRows : buildings.slice().sort((a,b)=>num(b['Open Risks'])-num(a['Open Risks'])).slice(0,8), stats: buildStats(buildings), corReports, projectRegister:corReports?.projectRegister||[], shutdowns:corReports?.shutdowns||[], assessmentIndex, loadedAt: new Date().toLocaleString()};
 }
 // Normalize the empty shell or the currently loaded workbook data.
 data = normalizeSiteRecord(data);
@@ -202,6 +214,7 @@ async function loadWorkbookFile(file){
     if(!next.buildings.length) throw new Error('PMIS_Data did not return building rows.');
     data = next;
     window.data = data;
+    window.getMissionData = ()=>data;
     selected = data.buildings.find(b=>b.Building===selected)?.Building || data.buildings[0].Building;
     renderAll(true);
     setSource(`Live workbook loaded: ${file.name} • ${data.buildings.length} buildings • ${data.loadedAt}`, 'good');
@@ -220,6 +233,8 @@ function currentDateString(){
   return now.toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'});
 }
 function selectedBuilding(){return data.buildings.find(x=>x.Building==selected)||data.buildings[0]||{};}
+window.selectedBuilding = selectedBuilding;
+window.getMissionData = ()=>data;
 function readinessPosture(avg){return avg>=80?'Mission Ready':avg>=55?'Watch Conditions':'Critical Review';}
 function renderCommandHud(){
   const s=data.stats||{};

@@ -1,3 +1,24 @@
+# Mission PMIS Changelog
+
+## 2.0.2 — Integration Pass
+- Exposed one shared selected-building accessor for the map, workspace, search, health cards, and reports.
+- Corrected Building Workspace selection so it follows the actual building dropdown instead of defaulting to the first building.
+- Rebuilt Project Health cards as accessible buttons with reliable click handlers and explicit readable colors.
+- Added assessment-sheet indexing for room and reference searches such as TR137A.
+- Search results now open the correct building and workspace tab.
+- Assessment search results show the matching source sheet, row, room/reference, and source detail.
+- Search, Project Register, Shutdown Tracker, and Building Workspace now consume the same loaded workbook data model.
+- Updated cache references to prevent GitHub Pages from serving stale JavaScript or CSS.
+
+## 2.0.1 — Building Workspace Integration Fix
+- Corrected invisible/grey workspace narrative text by isolating workspace colors from inherited application styles.
+- Improved Project Register building matching using Building, Linked Assessment, source sheet, and related references.
+- Improved Shutdown Tracker matching using multiple possible building and date fields.
+- Corrected Systems tab to read the selected building's trade notes.
+- Added fallback risk and question counts from active Project Register records when PMIS_Data counts are unavailable.
+- Added populated assessment detail, document/evidence, and photo/evidence views.
+- Split the overview into Current Status, Next Action, and Key Constraint for easier reading.
+
 # Changelog
 ## 1.3.8 — Empty Shell Release
 

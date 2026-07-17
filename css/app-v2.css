@@ -13,3 +13,88 @@ body.no-workbook .product-gate{display:grid}
 .product-badge{font-size:11px;font-weight:800;letter-spacing:.1em;color:#55b8d9;text-transform:uppercase}
 @media(max-width:900px){.health-grid,.workspace-summary,.report-launch-grid{grid-template-columns:1fr 1fr}.global-command{min-width:220px}.workspace-overlay{padding:8px}.workspace-board{height:calc(100vh - 16px)}}
 @media(max-width:560px){.health-grid,.workspace-summary,.report-launch-grid{grid-template-columns:1fr}.product-gate-card{padding:28px 18px}.product-gate h1{font-size:32px}.global-command{display:none}}
+
+/* 2.0.1 Building Workspace integration and contrast fix */
+.workspace-board,.workspace-body,.workspace-card,.workspace-empty,.workspace-table,.workspace-table td{
+  color:#172033 !important;
+  -webkit-text-fill-color:#172033 !important;
+  opacity:1 !important;
+}
+.workspace-body p,.workspace-copy,.workspace-intro{
+  color:#26384a !important;
+  -webkit-text-fill-color:#26384a !important;
+  opacity:1 !important;
+  line-height:1.55;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.workspace-card b,.workspace-card strong{
+  color:#17365d !important;
+  -webkit-text-fill-color:#17365d !important;
+}
+.workspace-status-pill{
+  display:inline-flex;
+  align-items:center;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#e7f0fa;
+  border:1px solid #c2d4e5;
+  color:#17365d !important;
+  -webkit-text-fill-color:#17365d !important;
+  font-weight:800;
+}
+.workspace-detail-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(180px,1fr));
+  gap:10px;
+}
+.workspace-detail-grid>div{
+  padding:12px;
+  border:1px solid #d9e2ea;
+  border-radius:9px;
+  background:#f7f9fb;
+}
+.workspace-detail-grid span{
+  display:block;
+  color:#66788a !important;
+  -webkit-text-fill-color:#66788a !important;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.workspace-detail-grid b{display:block;margin-top:5px}
+.workspace-table-wrap{width:100%;overflow:auto}
+.workspace-table td{background:#fff !important}
+.workspace-table tbody tr:nth-child(even) td{background:#f7f9fb !important}
+.workspace-intro{margin-top:-2px;font-size:12px}
+@media(max-width:760px){.workspace-detail-grid{grid-template-columns:1fr}}
+
+/* 2.0.2 shared data model interaction pass */
+.health-card{
+  appearance:none;
+  width:100%;
+  text-align:left;
+  font:inherit;
+  color:#172033 !important;
+  -webkit-text-fill-color:#172033 !important;
+  opacity:1 !important;
+}
+.health-card .health-name{
+  display:block;
+  color:#65788e !important;
+  -webkit-text-fill-color:#65788e !important;
+}
+.health-card .health-status{
+  display:block;
+  color:#17365d !important;
+  -webkit-text-fill-color:#17365d !important;
+  opacity:1 !important;
+}
+.health-card .health-evidence{
+  display:block;
+  color:#51677b !important;
+  -webkit-text-fill-color:#51677b !important;
+  opacity:1 !important;
+}
+.health-card:focus-visible{outline:3px solid #55b8d9;outline-offset:2px}
+.health-card:active{transform:translateY(1px)}
