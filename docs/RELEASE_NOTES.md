@@ -1,3 +1,7 @@
+# Mission PMIS 1.3.7
+
+This release completes a production pass on the reporting module. Reports now open in dedicated print layouts designed for clean multi-page PDF or paper output. COR reports respect the current building filter, omit empty sections, and use a consistent professional header and footer.
+
 # Release Notes
 
 ## v1.2.4 GitHub Long-Haul Stack

@@ -91,30 +91,47 @@ function renderReportsMode(){
 function openReportsMode(){renderReportsMode();document.getElementById('reportOverlay')?.classList.add('show');}
 function closeReportsMode(){document.getElementById('reportOverlay')?.classList.remove('show');}
 
-function printHtmlDocument(title, bodyHtml){
+function printHtmlDocument(title, bodyHtml, options={}){
   const w=window.open('', '_blank');
-  if(!w){ alert('Popup blocked. Allow popups for this file to print reports.'); return; }
-  w.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>
-    body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:28px;line-height:1.35}
-    h1{font-size:24px;margin:0 0 4px} h2{font-size:16px;margin:22px 0 8px;border-bottom:1px solid #999;padding-bottom:4px}
-    .meta{color:#555;margin-bottom:18px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 18px}.kpi{border:1px solid #bbb;padding:10px;border-radius:8px}.kpi b{display:block;font-size:20px}
-    table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}th,td{border-bottom:1px solid #ddd;padding:6px;text-align:left;vertical-align:top}th{background:#f1f5f9;font-size:10px;text-transform:uppercase;letter-spacing:.06em} .page-break{page-break-before:always}
-    @media print{button{display:none}body{margin:18mm}}
-  </style></head><body>${bodyHtml}<script>setTimeout(()=>window.print(),250)<\/script></body></html>`);
+  if(!w){ alert('Your browser blocked the report window. Allow popups for this site, then select Print again.'); return; }
+  const reportType=options.reportType||title;
+  const preparedBy=options.preparedBy||'GCC Owner QA/QC Team';
+  const generated=new Date().toLocaleString();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+    @page{size:letter portrait;margin:18mm 14mm 18mm 14mm}
+    *{box-sizing:border-box}html,body{background:#fff;color:#172033}body{font-family:Arial,Helvetica,sans-serif;margin:0;line-height:1.42;font-size:10.5pt}
+    .print-shell{max-width:100%;margin:0 auto}.print-header{border-bottom:3px solid #17365d;padding:0 0 10px;margin:0 0 16px;display:flex;justify-content:space-between;gap:18px;align-items:flex-end}
+    .brand{font-size:9pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2f75b5}.print-header h1{font-size:20pt;line-height:1.08;margin:3px 0 2px;color:#17365d}.subtitle{font-size:10pt;color:#53657a}.header-meta{text-align:right;font-size:8.5pt;color:#53657a;white-space:nowrap}
+    h2{font-size:13pt;color:#17365d;margin:20px 0 8px;border-bottom:1px solid #aebdcb;padding-bottom:4px;break-after:avoid-page}h3{font-size:11pt;margin:14px 0 6px;break-after:avoid-page}
+    p,li{orphans:3;widows:3}.friendly-note{background:#f3f7fb;border-left:4px solid #2f75b5;padding:10px 12px;margin:10px 0 14px;border-radius:0 6px 6px 0}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 18px}.kpi{border:1px solid #b8c5d2;padding:9px 10px;border-radius:7px;background:#f8fafc;break-inside:avoid}.kpi span{display:block;font-size:7.5pt;text-transform:uppercase;letter-spacing:.06em;color:#65788e}.kpi b{display:block;font-size:17pt;color:#17365d;margin-top:2px}
+    table{width:100%;border-collapse:collapse;font-size:8.4pt;margin:6px 0 14px;table-layout:auto}thead{display:table-header-group}tr{break-inside:avoid-page}th,td{border:1px solid #cfd8e2;padding:5px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf0f6;color:#17365d;font-size:7.4pt;text-transform:uppercase;letter-spacing:.04em}.section{break-inside:auto}.section.page-break{break-before:page}.avoid-break{break-inside:avoid-page}
+    .empty{color:#68798b;font-style:italic;padding:8px 0}.status-line{font-size:9pt;color:#53657a;margin:0 0 10px}.report-pre{white-space:pre-wrap;font-family:Arial,Helvetica,sans-serif;font-size:10pt;margin:0}
+    .print-footer{position:fixed;bottom:-12mm;left:0;right:0;border-top:1px solid #aebdcb;padding-top:4px;font-size:7.5pt;color:#65788e;display:flex;justify-content:space-between}.screen-only{display:none!important}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.print-shell{width:100%}.print-header{margin-top:0}.no-print{display:none!important}}
+  </style></head><body><div class="print-shell"><header class="print-header"><div><div class="brand">Mission PMIS</div><h1>${esc(reportType)}</h1><div class="subtitle">VA Bedford EHRM · Project 518-22-700</div></div><div class="header-meta">Generated: ${esc(generated)}<br>Prepared by: ${esc(preparedBy)}</div></header>${bodyHtml}<footer class="print-footer"><span>Mission PMIS · Owner Project Management Information System</span><span>Version 1.3.7</span></footer></div><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),350));<\/script></body></html>`);
   w.document.close();
 }
 function printSelectedReport(){
+  if(activeReportType==='all'){ printAllBuildingsReport(); return; }
+  const b=selectedBuilding()||{};
+  const typeLabel=activeReportType==='executive'?'Executive Summary':activeReportType==='field'?'Field Walk Brief':'Daily Command Report';
   const txt=reportText(activeReportType);
-  printHtmlDocument('Mission PMIS Report', `<h1>Mission PMIS Report</h1><div class="meta">Bedford VA Medical Center · ${new Date().toLocaleString()}</div><pre style="white-space:pre-wrap;font-family:Arial,Helvetica,sans-serif;font-size:12px">${esc(txt)}</pre>`);
+  const action=b['Next Action']||b['Major Blocker']||'Continue verification and update the source assessment as conditions develop.';
+  const body=`<div class="friendly-note"><b>Current focus:</b> ${esc(action)}</div><section class="section"><h2>Report Narrative</h2><pre class="report-pre">${esc(txt)}</pre></section>`;
+  printHtmlDocument(`Mission PMIS ${typeLabel}`,body,{reportType:typeLabel});
 }
 function printAllBuildingsReport(){
   const s=data.stats||{};
-  const rows=[...data.buildings].sort((a,b)=>String(a.Building).localeCompare(String(b.Building),undefined,{numeric:true})).map(b=>`<tr><td><b>${esc(reportBuildingLabel(b))}</b></td><td>${pct(b.readinessPct||0)}%</td><td>${esc(b['Overall Status']||b['Dashboard Signal']||'Monitor')}</td><td>${esc(b['Open Risks']||0)}</td><td>${esc(b['Open Questions']||0)}</td><td>${esc(b.Shutdowns||0)}</td><td>${esc(b['Construction Ready']||'No')}</td><td>${esc(b['Acceptance Status']||'Monitor')}</td><td>${esc(b['Next Action']||b['Major Blocker']||'')}</td></tr>`).join('');
-  const topRisks=topBuildingsBy('Open Risks',8).map(b=>`<li>${esc(reportBuildingLabel(b))} — ${esc(b['Open Risks']||0)} risks, ${pct(b.readinessPct||0)}% ready</li>`).join('');
-  const topQs=topBuildingsBy('Open Questions',8).map(b=>`<li>${esc(reportBuildingLabel(b))} — ${esc(b['Open Questions']||0)} questions, ${pct(b.readinessPct||0)}% ready</li>`).join('');
-  const body=`<h1>Mission PMIS All Buildings Report</h1><div class="meta">Bedford VA Medical Center · Generated ${new Date().toLocaleString()}</div><div class="kpis"><div class="kpi">Campus Readiness<b>${pct(s.avgReadiness||0)}%</b></div><div class="kpi">Buildings<b>${s.total||0}</b></div><div class="kpi">Open Risks<b>${Math.round(s.risks||0)}</b></div><div class="kpi">Open Questions<b>${Math.round(s.questions||0)}</b></div></div><h2>Building Rollup</h2><table><thead><tr><th>Building</th><th>Ready</th><th>Status</th><th>Risks</th><th>Questions</th><th>Shutdowns</th><th>Const. Ready</th><th>Acceptance</th><th>Primary Action</th></tr></thead><tbody>${rows}</tbody></table><h2 class="page-break">Top Risk Buildings</h2><ol>${topRisks}</ol><h2>Top Question Buildings</h2><ol>${topQs}</ol>`;
-  printHtmlDocument('Mission PMIS All Buildings Report', body);
+  const buildings=[...data.buildings].sort((a,b)=>String(a.Building).localeCompare(String(b.Building),undefined,{numeric:true}));
+  const rows=buildings.map(b=>`<tr><td><b>${esc(reportBuildingLabel(b))}</b></td><td>${pct(b.readinessPct||0)}%</td><td>${esc(b['Overall Status']||b['Dashboard Signal']||'Monitor')}</td><td>${esc(b['Open Risks']||0)}</td><td>${esc(b['Open Questions']||0)}</td><td>${esc(b.Shutdowns||0)}</td><td>${esc(b['Construction Ready']||'No')}</td><td>${esc(b['Acceptance Status']||'Monitor')}</td><td>${esc(b['Next Action']||b['Major Blocker']||'Continue monitoring.')}</td></tr>`).join('');
+  const topRisks=topBuildingsBy('Open Risks',8).filter(b=>Number(b['Open Risks']||0)>0).map(b=>`<li><b>${esc(reportBuildingLabel(b))}</b> — ${esc(b['Open Risks']||0)} open risk${Number(b['Open Risks']||0)===1?'':'s'}; ${pct(b.readinessPct||0)}% ready.</li>`).join('')||'<li>No open building risks are currently reported.</li>';
+  const topQs=topBuildingsBy('Open Questions',8).filter(b=>Number(b['Open Questions']||0)>0).map(b=>`<li><b>${esc(reportBuildingLabel(b))}</b> — ${esc(b['Open Questions']||0)} open question${Number(b['Open Questions']||0)===1?'':'s'}; ${pct(b.readinessPct||0)}% ready.</li>`).join('')||'<li>No open building questions are currently reported.</li>';
+  const body=`<div class="friendly-note">This report provides a campus-wide operational snapshot. Detailed conditions remain controlled by the building assessment sheets and supporting registers.</div><div class="kpis"><div class="kpi"><span>Campus Readiness</span><b>${pct(s.avgReadiness||0)}%</b></div><div class="kpi"><span>Buildings Tracked</span><b>${s.total||buildings.length||0}</b></div><div class="kpi"><span>Open Risks</span><b>${Math.round(s.risks||0)}</b></div><div class="kpi"><span>Open Questions</span><b>${Math.round(s.questions||0)}</b></div></div><section class="section"><h2>Building Readiness Rollup</h2><table><thead><tr><th>Building</th><th>Ready</th><th>Status</th><th>Risks</th><th>Questions</th><th>Shutdowns</th><th>Construction Ready</th><th>Acceptance</th><th>Primary Action</th></tr></thead><tbody>${rows}</tbody></table></section><section class="section page-break"><h2>Management Attention</h2><h3>Highest Open Risk Counts</h3><ol>${topRisks}</ol><h3>Highest Open Question Counts</h3><ol>${topQs}</ol></section>`;
+  printHtmlDocument('Mission PMIS All Buildings Report', body,{reportType:'All Buildings Status Report'});
 }
+
+window.printHtmlDocument=printHtmlDocument;
 
 async function copyReportsBrief(){
   const txt=reportText(activeReportType);

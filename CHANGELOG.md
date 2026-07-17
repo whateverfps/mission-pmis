@@ -1,3 +1,14 @@
+# Changelog
+
+## 1.3.7 — Reporting Production Pass
+- Added dedicated, multi-page print documents for Reports Center and COR Reports.
+- Added consistent report headers, project identification, generated date, and footer branding.
+- Removed dashboard navigation and controls from printed reports.
+- Added repeating table headers, print-safe page breaks, and overflow handling.
+- Improved report language so summaries read as operational briefings rather than raw dashboard exports.
+- COR printing now respects the selected building filter and omits empty sections.
+- Added stronger browser popup guidance when print windows are blocked.
+
 ## 1.3.4
 - Fixed live Excel import so CM_PM Operations and COR_Report are parsed into the COR Reporting Center.
 - Preserved COR report data after loading a workbook instead of replacing it with building-only data.

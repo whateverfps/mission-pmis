@@ -682,3 +682,16 @@ body{
 
 /* v1.3.6 — collapsible COR report sections */
 .cor-section{display:block}.cor-section>summary,.cor-summary>summary{list-style:none;cursor:pointer;user-select:none}.cor-section>summary::-webkit-details-marker,.cor-summary>summary::-webkit-details-marker{display:none}.cor-section-head{justify-content:flex-start}.cor-section-title{flex:1}.cor-chevron{width:12px;height:12px;border-right:2px solid #9fc4e8;border-bottom:2px solid #9fc4e8;transform:rotate(45deg);transition:transform .18s ease;margin-left:auto;margin-right:5px}.cor-section[open] .cor-chevron,.cor-summary[open] .cor-chevron{transform:rotate(225deg)}.cor-section-body{border-top:1px solid #2d425b}.cor-subhead{padding:10px 20px;background:#132338;color:#9fc4e8;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.cor-summary{padding:0}.cor-summary>summary{display:flex;align-items:center;gap:12px;padding:18px 22px}.cor-summary>summary h3{margin:0;flex:1}.cor-summary>p{margin:0;padding:0 22px 22px}.cor-section-tools{display:flex;gap:7px}.cor-section-tools button{background:#132338;color:#dbeafe;border:1px solid #385373;border-radius:8px;padding:7px 10px;cursor:pointer}.cor-section-tools button:hover{background:#1c3552}@media(max-width:900px){.cor-controls{align-items:flex-start;gap:12px;flex-direction:column}.cor-section-tools{order:3}}@media print{#corReportsContent details{display:block!important}#corReportsContent details>*{display:block!important}.cor-chevron{display:none!important}.cor-section-tools{display:none!important}}
+
+
+/* v1.3.7 — report production and multi-page print hardening */
+@media print{
+  html,body{height:auto!important;min-height:0!important;overflow:visible!important;background:#fff!important}
+  .report-overlay.show,.cor-overlay.show{position:static!important;inset:auto!important;height:auto!important;max-height:none!important;overflow:visible!important;padding:0!important;background:#fff!important}
+  .report-board,.report-board-scroll,.cor-board,#reportsContent,#corReportsContent{height:auto!important;max-height:none!important;overflow:visible!important;box-shadow:none!important;border:0!important}
+  .report-workspace,.report-grid,.report-kpis,.cor-kpis{display:block!important}
+  .report-side,.report-actions,.cor-actions,.cor-controls,.cor-section-tools,.meeting-close-x{display:none!important}
+  .report-card,.cor-section,.cor-summary{break-inside:auto!important;page-break-inside:auto!important;overflow:visible!important}
+  .cor-table-wrap{overflow:visible!important}.cor-table{table-layout:auto!important}.cor-table thead{display:table-header-group}.cor-table tr{break-inside:avoid-page}
+  .report-preview{max-height:none!important;overflow:visible!important;white-space:pre-wrap!important}
+}
