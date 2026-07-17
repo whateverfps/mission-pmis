@@ -98,3 +98,6 @@ body.no-workbook .product-gate{display:grid}
 }
 .health-card:focus-visible{outline:3px solid #55b8d9;outline-offset:2px}
 .health-card:active{transform:translateY(1px)}
+
+/* 2.0.3 purpose-built report previews */
+.report-current-title{display:flex;align-items:baseline;gap:10px;margin:8px 0 12px;color:#6d8195}.report-current-title span{text-transform:uppercase;font-size:10px;letter-spacing:.12em}.report-current-title strong{font-size:18px;color:#eef5fc}.report-context-list{list-style:none;margin:0;padding:0}.report-context-list li{padding:10px 0;border-bottom:1px solid rgba(160,185,210,.18)}.report-context-list li:last-child{border-bottom:0}.report-context-list b,.report-context-list span{display:block}.report-context-list b{color:#eef5fc}.report-context-list span{margin-top:3px;color:#b9c9d9;font-size:12px;line-height:1.4}

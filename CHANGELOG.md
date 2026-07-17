@@ -1,5 +1,13 @@
 # Mission PMIS Changelog
 
+## 2.0.3 — Purpose-Built Reports
+- Executive Brief now renders leadership health, decisions required, management attention, and two-week look-ahead.
+- CM/PM Operations now renders active deliverables, owners, due dates, overdue items, commissioning, pay applications, and shutdown coordination.
+- Daily Command Report now renders current campus posture, selected-building priority, today's action queue, and immediate coordination.
+- Field Walk Brief now renders selected-building verification items, building records, shutdowns, and field closeout steps.
+- Preview buttons now switch to genuinely different report content and Print Current follows the selected report.
+- Added a visible current-report title and report-specific supporting panel.
+
 ## 2.0.2 — Integration Pass
 - Exposed one shared selected-building accessor for the map, workspace, search, health cards, and reports.
 - Corrected Building Workspace selection so it follows the actual building dropdown instead of defaulting to the first building.
