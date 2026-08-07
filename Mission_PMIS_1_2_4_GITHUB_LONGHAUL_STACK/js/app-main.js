@@ -291,11 +291,24 @@ function toneFromStatus(v){
   return 'watch';
 }
 function healthPct(v){
-  const s=simpleStatus(v);
+  // Trade Health is a completion/readiness percentage, not a qualitative heat score.
+  // Preserve real numeric values from Excel when present and never invent mid-range
+  // percentages for statuses such as Verify / Watch / N/A.
+  if(typeof v === 'number' && Number.isFinite(v)){
+    return Math.max(0, Math.min(100, Math.round(v <= 1 ? v * 100 : v)));
+  }
+  const raw=String(v ?? '').trim();
+  if(/^[-+]?\d+(?:\.\d+)?%$/.test(raw)){
+    return Math.max(0, Math.min(100, Math.round(Number(raw.replace('%','')) || 0)));
+  }
+  if(/^[-+]?\d+(?:\.\d+)?$/.test(raw)){
+    const n=Number(raw);
+    return Math.max(0, Math.min(100, Math.round(n <= 1 ? n * 100 : n)));
+  }
+  const s=simpleStatus(raw);
   if(s==='PASS') return 100;
-  if(s==='FAIL') return 15;
-  if(s==='N/A') return 50;
-  return 55;
+  // FAIL, WATCH/VERIFY, N/A, blank, and other unverified states are 0% complete.
+  return 0;
 }
 function firstVal(row,names,fallback='Monitor'){
   const v=first(row,names);
@@ -337,7 +350,9 @@ function readinessTimeline(b){
   return `<div class="ops-card wide"><h3>Readiness Timeline</h3>${timelineRow('Inspection',b.readinessPct)}${timelineRow('OIT',b['OIT Readiness']||b.readinessPct)}${timelineRow('Material',b['Material Compliance']||b.readinessPct)}${timelineRow('Acceptance',b['Acceptance Readiness']||b.readinessPct)}</div>`;
 }
 function tradeHealth(b){
-  const rows=[['Fire',firstVal(b,['Fire','Fire Protection','Fire Alarm'],'PASS'),'fire'],['HVAC',firstVal(b,['HVAC','Mechanical','HVAC / Cooling'],'PASS'),'hvac'],['Electrical',firstVal(b,['Electrical','Electrical / UPS'],'PASS'),'electrical'],['Telecom',firstVal(b,['Telecom','Telecom / Fiber','OIT'],'PASS'),'telecom'],['Security',firstVal(b,['Security','Security / PACS / CCTV'],'PASS'),'security']];
+  // Do not default missing trade data to PASS. The workbook is the source of truth:
+  // unverified/missing trade completion remains 0 until Excel records completion.
+  const rows=[['Fire',firstVal(b,['Fire','Fire Protection','Fire Alarm'],'N/A'),'fire'],['HVAC',firstVal(b,['HVAC','Mechanical','HVAC / Cooling'],'N/A'),'hvac'],['Electrical',firstVal(b,['Electrical','Electrical / UPS'],'N/A'),'electrical'],['Telecom',firstVal(b,['Telecom','Telecom / Fiber','OIT'],'N/A'),'telecom'],['Security',firstVal(b,['Security','Security / PACS / CCTV'],'N/A'),'security']];
   return `<div class="ops-card"><h3>Trade Health</h3>${rows.map(([l,v,c])=>`<div class="trade-health-row"><div>${esc(l)}</div><div class="trade-bar ${c}"><span style="width:${healthPct(v)}%"></span></div><div>${healthPct(v)}%</div></div>`).join('')}</div>`;
 }
 function criticalAlerts(b,t,a){

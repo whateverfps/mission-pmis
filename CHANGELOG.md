@@ -97,3 +97,10 @@ Prepared Mission PMIS for GitHub Pages, version control, stable releases, and lo
 - Added tabbed Building Workspace.
 - Expanded report launch center.
 - Preserved empty-shell behavior until a workbook is loaded.
+## 2.0.5 — Trade Health Source-of-Truth Fix
+- Removed synthetic 55% Trade Health values for `Verify` / watch states.
+- Trade Health now preserves real numeric/percentage values from Excel when available.
+- PASS/complete states display 100%; unverified, failed, N/A, blank, or missing completion states display 0%.
+- Removed the unsafe fallback that treated missing trade data as PASS.
+- Cache-busted `app-main.js` so GitHub Pages/browser refreshes receive the corrected logic.
+
